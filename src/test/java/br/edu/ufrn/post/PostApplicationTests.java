@@ -1,10 +1,10 @@
-package br.edu.ufrn.user;
+package br.edu.ufrn.post;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserApplicationTests {
+class PostApplicationTests {
 
 	@Test
 	void contextLoads() {

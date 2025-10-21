@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.edu.ufrn</groupId>
-	<artifactId>user</artifactId>
+	<artifactId>post</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>user</name>
-	<description>User Webflux Service</description>
+	<name>post</name>
+	<description>Post Webflux Service</description>
 	<url/>
 	<licenses>
 		<license/>

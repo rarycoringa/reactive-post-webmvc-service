@@ -1,7 +1,7 @@
 services:
-  user-webflux:
+  post-webflux:
     build: .
-    container_name: user-webflux
+    container_name: post-webflux
     environment:
       - SERVER_PORT=8181
       - MONGODB_URI=mongodb://user:pass@mongo:27017/minisocialdb?authSource=admin

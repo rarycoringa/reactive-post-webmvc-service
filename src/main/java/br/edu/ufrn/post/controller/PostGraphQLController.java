@@ -1,32 +1,24 @@
 package br.edu.ufrn.post.controller;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
-import br.edu.ufrn.post.client.UserClient;
 import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
 import br.edu.ufrn.post.record.UserDTO;
-import br.edu.ufrn.post.repository.PostRepository;
-import br.edu.ufrn.post.service.PostService;
+import br.edu.ufrn.post.service.PostGraphQLService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Controller
 public class PostGraphQLController {
 
-    private final PostService postService;
-
-    public PostGraphQLController(
-        PostRepository repository,
-        @Qualifier("userGraphQLClient") UserClient client
-    ) {
-        this.postService = new PostService(repository, client);
-    }
+    @Autowired
+    private PostGraphQLService postService;
 
     @QueryMapping
     public Flux<PostDTO> getAll() {
@@ -44,7 +36,7 @@ public class PostGraphQLController {
     }
     
     @MutationMapping
-    public Mono<PostDTO> save(@Argument("createUserInput") CreatePostDTO createPostDTO) {
+    public Mono<PostDTO> save(@Argument("createPostInput") CreatePostDTO createPostDTO) {
         return postService.save(createPostDTO);
     }
     

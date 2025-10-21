@@ -1,6 +1,5 @@
 package br.edu.ufrn.post.client;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.stereotype.Component;
@@ -10,17 +9,15 @@ import br.edu.ufrn.post.record.UserDTO;
 import reactor.core.publisher.Mono;
 
 @Component
-@Qualifier("userGraphQLClient")
 public class UserGraphQLClient implements UserClient {
 
     private final HttpGraphQlClient client;
 
     public UserGraphQLClient(
+        WebClient.Builder builder,
         @Value("${user.graphql.base-url}") String baseUrl
     ) {
-        this.client = HttpGraphQlClient.builder(
-            WebClient.builder().baseUrl(baseUrl).build()
-        ).build();
+        this.client = HttpGraphQlClient.builder(builder.baseUrl(baseUrl)).build();
     }
 
     @Override
@@ -32,7 +29,6 @@ public class UserGraphQLClient implements UserClient {
                     name
                     age
                     createdAt
-                    updatedAt
                 }
             }
             """;

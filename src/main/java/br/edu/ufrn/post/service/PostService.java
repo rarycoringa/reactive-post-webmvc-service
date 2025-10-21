@@ -1,6 +1,6 @@
 package br.edu.ufrn.post.service;
 
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import br.edu.ufrn.post.client.UserClient;
 import br.edu.ufrn.post.model.Post;
@@ -11,17 +11,14 @@ import br.edu.ufrn.post.repository.PostRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Service
 public class PostService {
 
-    private final PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
+
     private final UserClient userClient;
 
-    public PostService(
-        PostRepository postRepository,
-        UserClient userClient
-    ) {
-        this.postRepository = postRepository;
+    public PostService(UserClient userClient) {
         this.userClient = userClient;
     }
 

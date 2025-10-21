@@ -2,29 +2,36 @@
 
 type User {
     id: String!
-    name: String!
-    age: Int!
+    name: String
+    age: Int
+    createdAt: String
+}
+
+type Post {
+    id: String!
+    content: String!
+    user: User!
     createdAt: String!
-    updatedAt: String!
 }
 
 # Inputs
 
-input CreateUserInput {
-    name: String!
-    age: Int!
+input CreatePostInput {
+    content: String!
+    userId: String!
 }
 
 # Queries
 
 type Query {
-    getAll: [User!]!
-    getById(id: String!): User
+    getAll: [Post]!
+    getAllByUserId(userId: String!): [Post]!
+    getById(id: String!): Post
 }
 
 # Mutations
 
 type Mutation {
-    save(createUserInput: CreateUserInput!): User
+    save(createPostInput: CreatePostInput!): Post!
     delete(id: String!): Boolean
 }

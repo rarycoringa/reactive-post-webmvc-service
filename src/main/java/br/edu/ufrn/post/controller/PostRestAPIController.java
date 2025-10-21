@@ -1,34 +1,28 @@
 package br.edu.ufrn.post.controller;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.edu.ufrn.post.client.UserClient;
 import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
-import br.edu.ufrn.post.repository.PostRepository;
-import br.edu.ufrn.post.service.PostService;
+import br.edu.ufrn.post.service.PostRestAPIService;
 import jakarta.ws.rs.QueryParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
+@RequestMapping("/posts")
 public class PostRestAPIController {
 
-    private final PostService postService;
-
-    public PostRestAPIController(
-        PostRepository repository,
-        @Qualifier("userRestAPIClient") UserClient client
-    ) {
-        this.postService = new PostService(repository, client);
-    }
+    @Autowired
+    private PostRestAPIService postService;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PostDTO> getAll() {
@@ -36,7 +30,7 @@ public class PostRestAPIController {
             .flatMap(this::enrichUser);
     }
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(params = "user_id", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PostDTO> getAllByUserId(@QueryParam("user_id") String userId) {
         return postService.getAllByUserId(userId)
             .flatMap(this::enrichUser);

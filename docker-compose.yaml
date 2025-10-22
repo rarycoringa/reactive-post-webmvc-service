@@ -4,8 +4,6 @@ services:
     container_name: post-webflux
     environment:
       - SERVER_PORT=8282
-      - MONGODB_URI=mongodb://user:pass@mongo:27017/minisocialdb?authSource=admin
-      - MONGODB_DATABASE=minisocialdb
     ports:
       - "8282:8282"
     networks:

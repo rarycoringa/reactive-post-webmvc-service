@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
+		<resilience4j.version>2.2.0</resilience4j.version>
 	</properties>
 	<dependencies>
 		<!-- Web dependencies -->
@@ -47,9 +48,8 @@
             <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
         </dependency>
 		<dependency>
-			<groupId>org.redisson</groupId>
-			<artifactId>redisson-spring-boot-starter</artifactId>
-			<version>3.51.0</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
 		</dependency>
 
 		<!-- Cloud dependencies -->
@@ -60,6 +60,24 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+
+		<!-- Fault Tolerance dependencies -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-reactor</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-retry</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-circuitbreaker</artifactId>
 		</dependency>
 
 		<!-- Observability dependencies -->
@@ -104,6 +122,7 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- Spring Cloud BOM -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
@@ -111,6 +130,15 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<!-- Resilience4j BOM -->
+			<dependency>
+				<groupId>io.github.resilience4j</groupId>
+				<artifactId>resilience4j-bom</artifactId>
+				<version>${resilience4j.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+        	</dependency>
 		</dependencies>
 	</dependencyManagement>
 

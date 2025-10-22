@@ -1,8 +1,8 @@
 package br.edu.ufrn.post.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import br.edu.ufrn.post.client.UserClient;
 import br.edu.ufrn.post.model.Post;
 import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
@@ -11,16 +11,11 @@ import br.edu.ufrn.post.repository.PostRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Service
 public class PostService {
 
     @Autowired
     private PostRepository postRepository;
-
-    private final UserClient userClient;
-
-    public PostService(UserClient userClient) {
-        this.userClient = userClient;
-    }
 
     public Flux<PostDTO> getAll() {
         return postRepository.findAll()
@@ -95,7 +90,4 @@ public class PostService {
         return postRepository.deleteById(id);
     }
 
-    public Mono<UserDTO> getUserById(String userId) {
-        return userClient.getById(userId);
-    }
 }

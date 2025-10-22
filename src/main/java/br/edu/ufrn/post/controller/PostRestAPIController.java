@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.ufrn.post.client.UserRestAPIClient;
 import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
-import br.edu.ufrn.post.service.PostRestAPIService;
+import br.edu.ufrn.post.service.PostService;
 import jakarta.ws.rs.QueryParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,7 +23,10 @@ import reactor.core.publisher.Mono;
 public class PostRestAPIController {
 
     @Autowired
-    private PostRestAPIService postService;
+    private PostService postService;
+
+    @Autowired
+    private UserRestAPIClient userClient;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PostDTO> getAll() {
@@ -54,7 +58,7 @@ public class PostRestAPIController {
     }
 
     public Mono<PostDTO> enrichUser(PostDTO post) {
-        return postService.getUserById(post.user().id())
+        return userClient.getById(post.user().id())
             .map(
                 user -> new PostDTO(
                     post.id(),

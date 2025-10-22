@@ -7,10 +7,11 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
+import br.edu.ufrn.post.client.UserGraphQLClient;
 import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
 import br.edu.ufrn.post.record.UserDTO;
-import br.edu.ufrn.post.service.PostGraphQLService;
+import br.edu.ufrn.post.service.PostService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,7 +19,10 @@ import reactor.core.publisher.Mono;
 public class PostGraphQLController {
 
     @Autowired
-    private PostGraphQLService postService;
+    private PostService postService;
+
+    @Autowired
+    private UserGraphQLClient userClient;
 
     @QueryMapping
     public Flux<PostDTO> getAll() {
@@ -47,7 +51,7 @@ public class PostGraphQLController {
 
     @SchemaMapping(typeName = "Post", field = "user")
     public Mono<UserDTO> enrichUser(PostDTO post) {
-        return postService.getUserById(post.user().id())
+        return userClient.getById(post.user().id())
             .defaultIfEmpty(post.user());
     }
 

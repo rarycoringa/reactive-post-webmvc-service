@@ -29,7 +29,7 @@ public class PostService {
     }
 
     public List<PostDTO> getAllByUserId(String userId) {
-        return postRepository.getAllByUserId(userId)
+        return postRepository.findAllByUserId(userId)
             .stream()
             .map(post -> new PostDTO(
                 post.getId(),

@@ -10,6 +10,6 @@ import br.edu.ufrn.post.model.Post;
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
 
-    List<Post> getAllByUserId(String userId);
+    List<Post> findAllByUserId(String userId);
     
 }

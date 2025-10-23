@@ -1,5 +1,7 @@
 package br.edu.ufrn.post.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,8 +10,6 @@ import br.edu.ufrn.post.record.CommentDTO;
 import br.edu.ufrn.post.record.CreateCommentDTO;
 import br.edu.ufrn.post.record.UserDTO;
 import br.edu.ufrn.post.repository.CommentRepository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
 public class CommentService {
@@ -17,46 +17,34 @@ public class CommentService {
     @Autowired
     private CommentRepository commentRepository;
 
-    public Flux<CommentDTO> getAllByPostId(String postId) {
+    public List<CommentDTO> getAllByPostId(String postId) {
         return commentRepository.getAllByPostId(postId)
-            .map(
-                comment -> new CommentDTO(
-                    comment.getId(),
-                    comment.getContent(),
-                    new UserDTO(
-                        comment.getUserId(),
-                        null,
-                        null
-                    ),
-                    comment.getCreatedAt()
-                )
-            );
+            .stream()
+            .map(comment -> new CommentDTO(
+                comment.getId(),
+                comment.getContent(),
+                new UserDTO(comment.getUserId(), null, null),
+                comment.getCreatedAt()))
+            .toList();
     }
     
-    public Mono<CommentDTO> save(String postId, CreateCommentDTO createCommentDTO) {
-        Comment commentModel = new Comment(
+    public CommentDTO save(String postId, CreateCommentDTO createCommentDTO) {
+        Comment comment = new Comment(
             createCommentDTO.content(),
             postId,
-            createCommentDTO.userId()
-        );
+            createCommentDTO.userId());
 
-        return commentRepository.save(commentModel)
-            .map(
-                comment -> new CommentDTO(
-                    comment.getId(),
-                    comment.getContent(),
-                    new UserDTO(
-                        comment.getUserId(),
-                        null,
-                        null
-                    ),
-                    comment.getCreatedAt()
-                )
-            );
+        Comment savedComment = commentRepository.save(comment);
+        
+        return new CommentDTO(
+            savedComment.getId(),
+            savedComment.getContent(),
+            new UserDTO(savedComment.getUserId(), null, null),
+            savedComment.getCreatedAt());
     }
     
-    public Mono<Void> delete(String id) {
-        return commentRepository.deleteById(id);
+    public void delete(String id) {
+        commentRepository.deleteById(id);
     }
 
 }

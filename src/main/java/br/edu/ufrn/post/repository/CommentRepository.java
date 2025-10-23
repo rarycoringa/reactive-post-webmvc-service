@@ -1,14 +1,15 @@
 package br.edu.ufrn.post.repository;
 
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import java.util.List;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import br.edu.ufrn.post.model.Comment;
-import reactor.core.publisher.Flux;
 
 @Repository
-public interface CommentRepository extends ReactiveMongoRepository<Comment, String> {
+public interface CommentRepository extends MongoRepository<Comment, String> {
 
-    Flux<Comment> getAllByPostId(String postId);
+    List<Comment> getAllByPostId(String postId);
     
 }

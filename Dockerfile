@@ -10,4 +10,4 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/target/post-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=webflux"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=webmvc"]

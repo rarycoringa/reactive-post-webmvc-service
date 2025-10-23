@@ -1,5 +1,7 @@
 package br.edu.ufrn.post.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -12,8 +14,6 @@ import br.edu.ufrn.post.record.CreateCommentDTO;
 import br.edu.ufrn.post.record.PostDTO;
 import br.edu.ufrn.post.record.UserDTO;
 import br.edu.ufrn.post.service.CommentService;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Controller
 public class CommentGraphQLController {
@@ -25,7 +25,7 @@ public class CommentGraphQLController {
     private UserGraphQLClient userClient;
     
     @MutationMapping
-    public Mono<CommentDTO> saveComment(
+    public CommentDTO saveComment(
         @Argument("postId") String postId,
         @Argument("createCommentInput") CreateCommentDTO createCommentDTO
     ) {
@@ -33,19 +33,18 @@ public class CommentGraphQLController {
     }
     
     @MutationMapping
-    public Mono<Void> deleteComment(@Argument String id) {
-        return commentService.delete(id);
+    public void deleteComment(@Argument String id) {
+        commentService.delete(id);
     }
 
     @SchemaMapping(typeName = "Post", field = "comments")
-    public Flux<CommentDTO> comments(PostDTO post) {
+    public List<CommentDTO> comments(PostDTO post) {
         return commentService.getAllByPostId(post.id());
     }
 
     @SchemaMapping(typeName = "Comment", field = "user")
-    public Mono<UserDTO> enrichUser(CommentDTO comment) {
-        return userClient.getById(comment.user().id())
-            .defaultIfEmpty(comment.user());
+    public UserDTO enrichUser(CommentDTO comment) {
+        return userClient.getById(comment.user().id());
     }
 
 }

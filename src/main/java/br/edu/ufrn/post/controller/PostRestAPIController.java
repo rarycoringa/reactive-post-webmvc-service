@@ -1,7 +1,8 @@
 package br.edu.ufrn.post.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,10 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import br.edu.ufrn.post.client.UserRestAPIClient;
 import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
+import br.edu.ufrn.post.record.UserDTO;
 import br.edu.ufrn.post.service.PostService;
 import jakarta.ws.rs.QueryParam;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/posts")
@@ -28,46 +28,45 @@ public class PostRestAPIController {
     @Autowired
     private UserRestAPIClient userClient;
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PostDTO> getAll() {
+    @GetMapping
+    public List<PostDTO> getAll() {
         return postService.getAll()
-            .flatMap(this::enrichUser);
+            .stream()
+            .map(this::enrichUser)
+            .toList();
     }
 
-    @GetMapping(params = "user_id", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PostDTO> getAllByUserId(@QueryParam("user_id") String userId) {
+    @GetMapping(params = "user_id")
+    public List<PostDTO> getAllByUserId(@QueryParam("user_id") String userId) {
         return postService.getAllByUserId(userId)
-            .flatMap(this::enrichUser);
+            .stream()
+            .map(this::enrichUser)
+            .toList();
     }
     
     @GetMapping("/{id}")
-    public Mono<PostDTO> getById(@PathVariable String id) {
-        return postService.getById(id)
-            .flatMap(this::enrichUser);
+    public PostDTO getById(@PathVariable String id) {
+        return enrichUser(postService.getById(id));
     }
     
     @PostMapping
-    public Mono<PostDTO> save(@RequestBody CreatePostDTO createPostDTO) {
-        return postService.save(createPostDTO)
-            .flatMap(this::enrichUser);
+    public PostDTO save(@RequestBody CreatePostDTO createPostDTO) {
+        return enrichUser(postService.save(createPostDTO));
     }
     
     @DeleteMapping("/{id}")
-    public Mono<Void> delete(@PathVariable String id) {
-        return postService.delete(id);
+    public void delete(@PathVariable String id) {
+        postService.delete(id);
     }
 
-    public Mono<PostDTO> enrichUser(PostDTO post) {
-        return userClient.getById(post.user().id())
-            .map(
-                user -> new PostDTO(
-                    post.id(),
-                    post.content(),
-                    user,
-                    post.createdAt()
-                )
-            )
-            .defaultIfEmpty(post);
+    public PostDTO enrichUser(PostDTO post) {
+        UserDTO user = userClient.getById(post.user().id());
+
+        return new PostDTO(
+            post.id(),
+            post.content(),
+            user,
+            post.createdAt());
     }
 
 }

@@ -1,7 +1,7 @@
 services:
-  post-webflux:
+  post-webmvc:
     build: .
-    container_name: post-webflux
+    container_name: post-webmvc
     environment:
       - SERVER_PORT=8282
     ports:

@@ -1,52 +1,47 @@
 package br.edu.ufrn.post.client;
 
-import java.time.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.graphql.client.HttpGraphQlClient;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.graphql.client.HttpSyncGraphQlClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import br.edu.ufrn.post.record.UserDTO;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
-import io.github.resilience4j.retry.Retry;
-import reactor.core.publisher.Mono;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 @Component
 public class UserGraphQLClient implements UserClient {
 
-    @Autowired
-    private ReactiveRedisTemplate<String, UserDTO> cache;
-
-    @Autowired
-    private CircuitBreaker circuitBreaker;
-
-    @Autowired
-    private Retry retry;
-
-    private final HttpGraphQlClient client;
+    private final HttpSyncGraphQlClient client;
 
     private static final Logger logger = LoggerFactory.getLogger(UserGraphQLClient.class);
 
     public UserGraphQLClient(
-        WebClient.Builder builder,
+        @LoadBalanced RestTemplate restTemplate,
         @Value("${user.graphql.base-url}") String baseUrl
     ) {
-        this.client = HttpGraphQlClient.builder(builder.baseUrl(baseUrl)).build();
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
+        this.client = HttpSyncGraphQlClient.create(RestClient.create(restTemplate));
     }
 
-    private Mono<UserDTO> fetchAndCacheFallback(String userId, Throwable ex) {
-        return Mono.just(new UserDTO(userId, null, null))
-            .doOnNext(obj -> logger.warn("Fallback triggered for userId={} due to {}", userId, ex.toString()));
+    public UserDTO fallbackGetById(String userId, Throwable ex) {
+        logger.warn("Fallback triggered for userId={} due to {}", userId, ex.toString());
+        return new UserDTO(userId, null, null);
     }
 
-    private Mono<UserDTO> fetchAndCache(String userId, String key) {
+    @Override
+    @Cacheable(value = "users", key = "#userId")
+    @Retry(name = "userClientRetry")
+    @CircuitBreaker(name = "userClientCircuitBreaker", fallbackMethod = "fallbackGetById")
+    public UserDTO getById(String userId) {
+        logger.info("Fetching userId={} from user service.", userId);
+        
         String query = """
             query GetById($id: String!) {
                 getById(id: $id) {
@@ -62,25 +57,7 @@ public class UserGraphQLClient implements UserClient {
             .variable("id", userId)
             .retrieve("getById")
             .toEntity(UserDTO.class)
-            .transformDeferred(RetryOperator.of(retry))
-            .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-            .onErrorResume(ex -> fetchAndCacheFallback(userId, ex))
-            .flatMap(user -> cache.opsForValue()
-                .set(key, user, Duration.ofMinutes(1))
-                .doOnSuccess(v -> logger.info(
-                    "Cache miss for key=[{}]. Fetched userId={} and cached for {} minute(s)", key, userId, 1))
-                .thenReturn(user));
-    }
-
-    @Override
-    public Mono<UserDTO> getById(String userId) {
-        String key = "graphql:user:" + userId;
-
-        return cache.opsForValue()
-            .get(key)
-            .doOnNext(obj -> logger.info(
-                "Cache hit for key=[{}]. Returning cached UserDTO for userId={}", key, userId))
-            .switchIfEmpty(fetchAndCache(userId, key));
+            .block();
     }
 
 }

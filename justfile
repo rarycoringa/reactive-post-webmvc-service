@@ -3,7 +3,7 @@ build:
 
 run:
     mvn spring-boot:run \
-        -Dspring-boot.run.profiles=webflux
+        -Dspring-boot.run.profiles=webmvc
 
 up:
     docker compose up --build --detach

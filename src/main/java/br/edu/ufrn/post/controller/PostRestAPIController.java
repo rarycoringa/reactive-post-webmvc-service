@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.ufrn.post.client.UserRestAPIClient;
@@ -16,7 +17,6 @@ import br.edu.ufrn.post.record.CreatePostDTO;
 import br.edu.ufrn.post.record.PostDTO;
 import br.edu.ufrn.post.record.UserDTO;
 import br.edu.ufrn.post.service.PostService;
-import jakarta.ws.rs.QueryParam;
 
 @RestController
 @RequestMapping("/posts")
@@ -37,7 +37,7 @@ public class PostRestAPIController {
     }
 
     @GetMapping(params = "user_id")
-    public List<PostDTO> getAllByUserId(@QueryParam("user_id") String userId) {
+    public List<PostDTO> getAllByUserId(@RequestParam("user_id") String userId) {
         return postService.getAllByUserId(userId)
             .stream()
             .map(this::enrichUser)

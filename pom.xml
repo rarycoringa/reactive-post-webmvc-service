@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>br.edu.ufrn</groupId>
 	<artifactId>post</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>post</name>
 	<description>Post WebMVC Service</description>
 	<url/>
